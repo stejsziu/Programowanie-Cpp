@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cmath>
-#define PI 3.14159265358979323846
+#define PI 4*atan(1)
 
 // =========================================================================
 // =========================================================================
@@ -23,7 +23,7 @@ class Wektor2D {
 
         Wektor2D(double wspX, double wspY) { // mozna tez zrobic od razu wartosci
             ++num_wek;
-            x = wspX; 
+            x = wspX;
             y = wspY;
             std::cout << "Utworzono wektor: x = " << x << ", y = " << y << "\n";
         }
@@ -33,10 +33,10 @@ class Wektor2D {
         static int populacja() { return num_wek; }
 
         Wektor2D() { ++num_wek; x = 0.; y = 0.; } // mozna zrobic pusty wektor
-        
-        ~Wektor2D() { 
+
+        ~Wektor2D() {
             std::cout << "Nastapilo morderstwo wektora: \
-            x = " << x << ", y = " << y << "\n"; 
+            x = " << x << ", y = " << y << "\n";
             --num_wek;
         }
 
@@ -68,24 +68,24 @@ Wektor2D operator*(const Wektor2D& v1, const Wektor2D& v2) {
 
 int Wektor2D::num_wek = 0;
 int main()
-{ 
+{
     std::cout << "\n\nStart programu." << "\n" << "****************************\n";
 
-    Wektor2D r1 = Wektor2D::kart(1., 2.); 
+    Wektor2D r1 = Wektor2D::kart(1., 2.);
     std::cout << "Liczba wektorow: " << Wektor2D::populacja() << "\n";
-    
-    Wektor2D r2 = Wektor2D::kart(3., 4.); 
+
+    Wektor2D r2 = Wektor2D::kart(3., 4.);
     std::cout << "Liczba wektorow: " << Wektor2D::populacja() << "\n";
-    
-    { 
+
+    {
         Wektor2D r3 = Wektor2D::kart(5., 6.);
         Wektor2D r4 = Wektor2D::kart(7., 8.);
         std::cout << "Liczba wektorow w bloku: " << Wektor2D::populacja() << "\n";
     } // r3 i r4 giną tutaj, zmniejszają licznik automatycznie
-    
+
     std::cout << "Liczba wektorow po bloku: " << Wektor2D::populacja() << "\n";
-    
-    Wektor2D r5 = Wektor2D::kart(9., 10.); 
+
+    Wektor2D r5 = Wektor2D::kart(9., 10.);
     std::cout << "Liczba wektorow: " << Wektor2D::populacja() << "\n";
 
     Wektor2D r6 = Wektor2D::bieg(6.0, 45.0 * PI/180.0);
@@ -95,4 +95,4 @@ int main()
 
     std::cout << "\n****************************\nKoniec programu.\n\n\n";
     return 0;
-} 
+}
