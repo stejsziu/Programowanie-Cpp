@@ -17,8 +17,7 @@ class Wektor
         }
 
         // konstruktor kopiujacy (zad. 14, 16)
-        Wektor(const Wektor& v)
-            : tablica{new double[v.dlugosc]}, dlugosc{v.dlugosc}, pojemnosc{v.dlugosc} {
+        Wektor(const Wektor& v): tablica{new double[v.dlugosc]}, dlugosc{v.dlugosc}, pojemnosc{v.dlugosc} {
             std::cout << "Nastapilo skopiowanie wektora...\n";
             for(unsigned int i = 0; i < dlugosc; i++)
                 tablica[i] = v.tablica[i];
