@@ -1,17 +1,26 @@
 #include <iostream>
 #include <cmath>
+#include <string>
 
 const double PI = 4 * std::atan(1);
 
-// g++ -Wall -Wextra lab3.cpp -o lab3
-// ./lab3
-// ALBO
 // g++ -Wall -Wextra lab3.cpp -o lab3 && ./lab3
 
 class BytGeometryczny
 {
     public:
-        virtual void id();
+        virtual ~BytGeometryczny() {}
+        virtual void id() const = 0;
+};
+
+class Kolo;
+class Kwadrat;
+
+class WizytatorFigurBaza
+{
+    public:
+        virtual void wizytuj(Kwadrat& kwadracik) = 0;
+        virtual void wizytuj(Kolo& koleczko) = 0;
 };
 
 class Figura : public BytGeometryczny
@@ -20,7 +29,8 @@ class Figura : public BytGeometryczny
         Figura(double wymiar) : pole{wymiar} {}
         virtual ~Figura() { std::cout << "Nastapilo morderstwo figury\n"; }
         double getPole() const { return pole; }
-        virtual void id() const { std::cout << "figura, pole = " << getPole() << std::endl; }
+        virtual void id() const override { std::cout << "figura, pole = " << getPole() << std::endl; }
+        virtual void akceptuj(WizytatorFigurBaza&) = 0;
 
     protected:
         double pole = 0;
@@ -32,6 +42,7 @@ class Kolo : public Figura
         Kolo(double promien) : Figura{PI*promien*promien} {}
         virtual ~Kolo() { std::cout << "Nastapilo morderstwo kola\n"; }
         void id() const override { std::cout << "kolo, pole = " << getPole() << std::endl; }
+        void akceptuj(WizytatorFigurBaza& v) override { v.wizytuj(*this); }
 };
 
 class Kwadrat : public Figura
@@ -40,21 +51,125 @@ class Kwadrat : public Figura
         Kwadrat(double bok) : Figura{bok*bok} {}
         virtual ~Kwadrat() { std::cout << "Nastapilo morderstwo kwadratu\n"; }
         void id() const override { std::cout << "kwadrat, pole = " << getPole() << std::endl; }
+        void akceptuj(WizytatorFigurBaza& v) override { v.wizytuj(*this); }
 };
 
 class WektorFigur
 {
-    new tabblica
+    public:
+        WektorFigur() {}
+        ~WektorFigur() {
+            for(int i = 0; i < licznik; i++)
+                delete tablica[i];
+        }
+
+        Figura* operator[](int idx) const {
+            if (idx < 0 || idx >= licznik)
+                return nullptr;
+            return tablica[idx];
+        }
+
+        void push(Figura* figurka) {
+            if (licznik < 1000) {
+                tablica[licznik] = figurka;
+                ++licznik;
+            }
+        }
+
+        void pop() {
+            if (licznik > 0 && licznik < 1000) {
+                --licznik;
+                delete tablica[licznik];
+                tablica[licznik] = nullptr;
+            }
+        }
+
+        void idWszystkie() const {
+            for(int i = 0; i < licznik; i++)
+                tablica[i]->id();
+        }
+
+        void wizytujWszystkie(WizytatorFigurBaza& v) {
+            for(int i = 0; i < licznik; i++)
+                tablica[i]->akceptuj(v);
+        }
+
+    private:
+        Figura* tablica[1000] = {};
+        int licznik = 0;
 };
 
 void id(const Figura& figurka){
     figurka.id();
 }
 
+class FabrykaFigur
+{
+    public:
+        Figura* operator()(const std::string& typ_figury, double rozmiar) {
+            if(typ_figury == "kolo")
+                return new Kolo{rozmiar};
+            else if(typ_figury == "kwadrat")
+                return new Kwadrat{rozmiar};
+            else
+             return nullptr;
+        }
+    };
+
+class WizytatorDrukujacy : public WizytatorFigurBaza
+{
+    public:
+        void wizytuj(Kwadrat& kwadracik) override { std::cout << "wizytuje kwadrat, pole = " << kwadracik.getPole() << std::endl; }
+        void wizytuj(Kolo& koleczko) override { std::cout << "wizytuje kolo, pole = " << koleczko.getPole() << std::endl; }
+};
+
 int main()
 {
-    BytGeometryczny xd;
+    /* ---- do konca ---- */
+    FabrykaFigur fabryka;
+    WektorFigur wf;
+    WizytatorDrukujacy wd;
 
+    std::string typ;
+    double rozmiar;
+    std::cout << "Podawaj: typ rozmiar (kolo/kwadrat), koniec = stop\n";
+    while (std::cin >> typ && typ != "stop") {
+        std::cin >> rozmiar;
+        Figura* f = fabryka(typ, rozmiar);
+        if (f)
+            wf.push(f);
+        else
+            std::cout << "nieznany typ\n";
+    }
+
+    wf.wizytujWszystkie(wd);
+
+    /* --- do zad20 ---
+    FabrykaFigur fabryka;
+    WektorFigur wf;
+
+    Figura* f = fabryka("kwadrat", 3.);
+    if (f)
+        wf.push(f);
+
+    wf.push(fabryka("kolo", 2.));   // uwaga: push(nullptr) też by przeszło
+
+    wf[0]->id();   // kwadrat, pole = 9
+    wf[1]->id();   // kolo, pole = 12.5664
+    */
+    /* ---- do zad19 ---
+    WektorFigur wf;
+    wf.push(new Kwadrat{3.});
+    wf.push(new Kolo{2.});
+    wf[0]->id();   // kwadrat, pole = 9
+    wf[1]->id();   // kolo, pole = 12.5664
+    wf.pop();      // niszczy koło
+    wf.pop();      // niszczy kwadrat
+    wf.pop();      // nic się nie dzieje, wektor pusty
+    */
+    /* ---- do zad14
+    BytGeometryczny xd;
+    */
     /* ---- do zad13
     Figura* f = new Kwadrat{3.};
     delete f;
@@ -91,6 +206,82 @@ int main()
     return 0;
 }
 
+/* ------------ do zad19 ------------
+    class BytGeometryczny
+    {
+        public:
+            virtual ~BytGeometryczny() {}
+            virtual void id() const = 0;
+    };
+
+    class Figura : public BytGeometryczny
+    {
+        public:
+            Figura(double wymiar) : pole{wymiar} {}
+            virtual ~Figura() { std::cout << "Nastapilo morderstwo figury\n"; }
+            double getPole() const { return pole; }
+            virtual void id() const override { std::cout << "figura, pole = " << getPole() << std::endl; }
+
+        protected:
+            double pole = 0;
+    };
+
+    class Kolo : public Figura
+    {
+        public:
+            Kolo(double promien) : Figura{PI*promien*promien} {}
+            virtual ~Kolo() { std::cout << "Nastapilo morderstwo kola\n"; }
+            void id() const override { std::cout << "kolo, pole = " << getPole() << std::endl; }
+    };
+
+    class Kwadrat : public Figura
+    {
+        public:
+            Kwadrat(double bok) : Figura{bok*bok} {}
+            virtual ~Kwadrat() { std::cout << "Nastapilo morderstwo kwadratu\n"; }
+            void id() const override { std::cout << "kwadrat, pole = " << getPole() << std::endl; }
+    };
+
+    class WektorFigur
+    {
+        public:
+            WektorFigur() {}
+            ~WektorFigur() {
+                for(int i = 0; i < licznik; i++)
+                    delete tablica[i];
+            }
+
+            Figura* operator[](int idx) const
+            {
+                if (idx < 0 || idx >= licznik)
+                    return nullptr;
+                return tablica[idx];
+            }
+
+            void push(Figura* figurka) {
+                if (licznik < 1000) {
+                    tablica[licznik] = figurka;
+                    ++licznik;
+                }
+            }
+
+            void pop() {
+                if (licznik > 0 && licznik < 1000) {
+                    --licznik;
+                    delete tablica[licznik];
+                    tablica[licznik] = nullptr;
+                }
+            }
+
+        private:
+            Figura* tablica[1000] = {};
+            int licznik = 0;
+    };
+
+    void id(const Figura& figurka){
+        figurka.id();
+    }
+*/
 
 /* ------------ do zad4 ------------
     class Figura
