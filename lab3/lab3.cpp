@@ -1,15 +1,15 @@
 #include <iostream>
 #include <cmath>
 #include <string>
+#include <numbers>
 
-const double PI = 4 * std::atan(1);
-
+using std::numbers::pi;
 // g++ -Wall -Wextra lab3.cpp -o lab3 && ./lab3
 
 class BytGeometryczny
 {
     public:
-        virtual ~BytGeometryczny() {}
+        virtual ~BytGeometryczny() = default;
         virtual void id() const = 0;
 };
 
@@ -39,7 +39,7 @@ class Figura : public BytGeometryczny
 class Kolo : public Figura
 {
     public:
-        Kolo(double promien) : Figura{PI*promien*promien} {}
+        Kolo(double promien) : Figura{pi*promien*promien} {}
         virtual ~Kolo() { std::cout << "Nastapilo morderstwo kola\n"; }
         void id() const override { std::cout << "kolo, pole = " << getPole() << std::endl; }
         void akceptuj(WizytatorFigurBaza& v) override { v.wizytuj(*this); }
